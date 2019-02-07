@@ -1,5 +1,8 @@
 <script src=_js/lib1.js></script>
 
+<head>
+<title>Assignment 1</title>
+</head>
 <body bgcolor=black text=white link=white alink=white vlink=white>
 <center>
 <canvas id='canvas1' width=400 height=400></canvas>
@@ -34,9 +37,9 @@
     // HERE YOU CAN WRITE ANY CODE TO
     // DEFINE A COLOR FOR THIS FRAGMENT
 
-    float red   = sin(10.*vPos.x) * .5 + .5;
-    float green = sin(10.*vPos.y) * .5 + .5;
-    float blue  = .5 + .5 * sin(10. * uTime);
+    float red   = sin(10.0 * vPos.x) * 0.5 + 0.5;
+    float green = sin(10.0 * vPos.y) * 0.5 + 0.5;
+    float blue  = 0.5 + 0.5 * sin(10.0 * uTime);
 
     // R,G,B EACH RANGE FROM 0.0 TO 1.0
 
