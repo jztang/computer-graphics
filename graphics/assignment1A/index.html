@@ -25,30 +25,26 @@
 <!-------- FRAGMENT SHADER: THIS IS WHERE YOU WILL DO YOUR WORK -------->
 
 <script id='my_fragment_shader' type='x-shader/x-fragment'>
+  uniform float uTime;
+  varying vec3 vPos;
 
- uniform float uTime;   // TIME, IN SECONDS
+  void main() {
+  float x = vPos.x;
+  float y = vPos.y;
+  float t = uTime;
+  float a = sin((x / y) - (x * y) - (1.5 * t));
+  float s = sqrt(420.69);
 
- varying vec3 vPos;     // -1 < vPos.x < +1
-                        // -1 < vPos.y < +1
-                        //      vPos.z == 0
+  float r = (tan(100.0 * x) * 0.5) + 0.5 + a * s;
+  float g = (tan(100.0 * y) * 0.5) + 0.5 + a * s;
+  float b = (sin(10.0 - (2.5 * t)) * 0.5) + 0.5 + a  ;
 
- void main() {    // YOU MUST DEFINE main()
+  vec3 color = vec3(r, g, b);
 
-    // HERE YOU CAN WRITE ANY CODE TO
-    // DEFINE A COLOR FOR THIS FRAGMENT
-
-    float red   = sin(10.0 * vPos.x) * 0.5 + 0.5;
-    float green = sin(10.0 * vPos.y) * 0.5 + 0.5;
-    float blue  = 0.5 + 0.5 * sin(10.0 * uTime);
-
-    // R,G,B EACH RANGE FROM 0.0 TO 1.0
-
-    vec3 color = vec3(red, green, blue);
-
-    // THIS LINE OUTPUTS THE FRAGMENT COLOR
-
-    gl_FragColor = vec4(sqrt(color), 1.0);
- }</script>
+  gl_FragColor = vec4(sqrt(color), 1.0);
+  
+}
+ </script>
 
 
 <!-------- CREATE A PROPERLY DESCRIPTIVE TITLE BELOW -------->
