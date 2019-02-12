@@ -1,7 +1,7 @@
 <script src=_js/lib1.js></script>
 
 <head>
-<title>Assignment 1</title>
+<title>Assignment 1 Version B</title>
 </head>
 <body bgcolor=black text=white link=white alink=white vlink=white>
 <center>
@@ -25,51 +25,51 @@
 <!-------- FRAGMENT SHADER: THIS IS WHERE YOU WILL DO YOUR WORK -------->
 
 <script id='my_fragment_shader' type='x-shader/x-fragment'>
-    uniform float uTime;
+  uniform float uTime;
   varying vec3 vPos;
 
   void main() {
-  float x = vPos.x * vPos.y;
-  float y = vPos.y * vPos.x;
-  float t = uTime;
-  float a = sin((x / y) - (x * y) - (0.8 * t));
-  float s = sqrt(420.69);
+    float xy = vPos.x * vPos.y;
+    float t = uTime;
+    float a = sin(1.0 - (xy * xy) - (0.6 * t));
+    float s = sqrt(420.69);
 
-  float r = (tan(1000.0 * x) * 0.5) + 0.5 + a * s;
-  float g = (tan(1000.0 * y) * 0.5) + 0.5 + a * s;
-  float b = (sin(10.0 - (2.5 * t)) * 0.5) + 0.5 + a  ;
+    float r = (tan(1000.0 * xy) * 0.5) + 0.5 + a * s;
+    float g = (tan(1000.0 * xy) * 0.5) + 0.5 + a * s;
+    float b = (sin(10.0) * 0.5) + 0.5 + a ;
 
-  vec3 color = vec3(r, g, b);
-
-  gl_FragColor = vec4(sqrt(color), 1.0);
-  
-}
- 
+    vec3 color = vec3(1.0 / r, 1.0 / g, b);
+    gl_FragColor = vec4(sqrt(color), 1.0);
+  }
  </script>
 
 
 <!-------- CREATE A PROPERLY DESCRIPTIVE TITLE BELOW -------->
 
 <script id='my_title' type='text/html'>
-HERE YOU CAN GIVE YOUR PROGRAM A TITLE
+Assignment 1 - Version B
 </script>
 
 
 <!-------- HERE IS WHERE YOU CAN PROVIDE A LONGER TEXT DESCRIPTION -------->
 
 <script id='my_instructions' type='text/html'><font color=#b0b0b0>
-Here you can write a description<br>
-in HTML format of what your program<br>
-is doing, and why you wrote it.
+This is a fragment shader for my Computer<br>
+Graphics class.<br>
 <p>
-<i>For example:</i>
+It makes use of <code>uTime, vPos, sqrt(),<br>
+sin(),</code> and <code>tan()</code>.<br>
 <p>
-This is a really simple fragment shader<br>
-program I wrote so the students in my<br>
-computer graphics class can see how<br>
-<code>uTime</code> and <code>vPos</code> can be the inputs for<br>
-a fragment shader, and <code>gl_FragColor</code><br>
-is the output.
+This shader was based off <a href="../assignment1A/index.html">Version A</a>,<br>
+with the main difference being that I<br>
+multiplied <code>vPos.x</code> and <code>vPos.y</code> together<br>
+instead of using them seperately,<br>
+and also took the reciprocal of <code>r</code> and <code>g</code>.<br>
+<p>
+Again, I threw a bunch more math<br>
+at it until it looked cool.<br>
+<p>
+<a href="../index.html">Back</a>
 </script>
 
 
