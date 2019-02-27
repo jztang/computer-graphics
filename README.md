@@ -1,3 +1,9 @@
-# jzt212
+# Computer Graphics
 
-[Personal website](http://i6.cims.nyu.edu/~jzt212/) on CIMS.
+I use this website to host my computer graphics assignments.
+
+* Assignment 1 - Basic fragment shader
+    * [Version A](http://i6.cims.nyu.edu/~jzt212/graphics/assignment1A/)
+    * [Version B](http://i6.cims.nyu.edu/~jzt212/graphics/assignment1B/)
+* [Assignment 2](http://i6.cims.nyu.edu/~jzt212/graphics/assignment2/) - Fragment shader w/ noise
+* [Assignment 3](http://i6.cims.nyu.edu/~jzt212/graphics/assignment3/) - Ray tracing to a sphere & Phong shading
