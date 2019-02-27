@@ -37,8 +37,9 @@
    for(int x = 0; x < n; x++) { // for each column
      float curY = -1.0;
      for(int y = 0; y < n; y++) { // for each row
+       // check for box (col, row)
        if(vPos.x >= curX && vPos.x <= curX + interval && 
-          vPos.y >= curY && vPos.y <= curY + interval) { // check for box (col, row)
+          vPos.y >= curY && vPos.y <= curY + interval) {
          vec3 p = vec3(curX, curY, curX * curY);
          r = 0.5 + 0.5 * noise(p);
          g = 0.5 + 0.5 * noise(p * 0.5);
