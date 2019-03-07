@@ -32,8 +32,8 @@ const int NSHAPES = 2;
 const int NLIGHTS = 2;
 
 uniform vec4 S[NSHAPES];
-uniform mat4 M[NSHAPES];
 uniform mat3 L[NLIGHTS];
+uniform mat4 M[NSHAPES];
 
 float fl = 3.5;
 vec3 skyColor = vec3(0.0, 0.0, 0.05);
@@ -48,7 +48,7 @@ float ray_sphere(vec3 V, vec3 W, vec4 sphere) {
 }
 
 // Checking if a surface point is in shadow
-bool shadow(vec3 P, vec3 L){
+bool shadow(vec3 P, vec3 L) {
    for(int i = 0; i < NSHAPES; i++) {
       if(ray_sphere(P, L, S[i]) > 0.001) {
          return true;
@@ -57,7 +57,32 @@ bool shadow(vec3 P, vec3 L){
    return false;
 }
 
+// Phong shading
+vec3 phong(vec3 P, vec3 W, vec3 N, mat4 material) {
+	vec3 color = material[0].rgb;
+   	for(int i = 0; i < NLIGHTS; i++) {
+    		if(!shadow(P, L[i][0])) {
+         	color += L[i][1] * material[1].rgb 
+         	         * max(0.0, dot(L[i][0], N));
+          	color += L[i][1] * material[2].rgb * pow(max(0.0, 
+          	         dot(reflect(-L[i][0], N), -W)), material[2].a);
+    		}
+   	}
+   return color;
+}
+
 void main() {
+	/*M[0][0] = vec4(.1,.04,.0,.0);
+   M[0][1] = vec4(.5,.2,.0,.0);
+   M[0][2] = vec4(.5,.5,.5,10.);
+
+   M[1][0] = vec4(.1,.0,.0,.0);
+   M[1][1] = vec4(.5,.0,.0,.0);
+   M[1][2] = vec4(.5,.5,.5,10.);
+
+   M[0][3].a = 1.0;
+   M[1][3].a = 1.0;*/
+
    vec3 V = vec3(0.0, 0.0, fl);
    vec3 W = normalize(vec3(vPos.x, vPos.y, -fl));
 
@@ -75,35 +100,34 @@ void main() {
          Mj = M[j];
       }
    }
-/*
-   float alpha = M[j][3].a;
-   if(alpha > 0) {
-      t = 1000;
-      for(int i = 0; i < NSHAPES; i++) {
-         float _t = ray_sphere(P, R, S[i]);
-         if(_t > 0.001 && _t < t) {
-            t = _t;
-            Si = S[i];
-            Mi = M[i];
-         }
-      }
-      if(t > 1000) {
-         color = mix(color, phong(P, N, Si, Mi), alpha);
-      }
-   }
-*/
-   if(t < 1000.0) {
-      vec3 P = V + t * W;
-      vec3 N = normalize(P - Sj.xyz);
 
-      color = Mj[0].rgb;
-      for(int i = 0; i < NLIGHTS; i++) {
-         if(!shadow(P, L[i][0])) {
-            color += L[i][1] * Mj[1].rgb * max(0.0, dot(L[i][0], N));
-            color += L[i][1] * Mj[2].rgb *
-            pow(max(0.0, dot(reflect(-L[i][0], N), -W)), Mj[2].a);
-         }
-      }
+   if(t < 1000.0) {
+   	vec3 Pj = V + t * W;
+   	vec3 Nj = normalize(Pj - Sj.xyz);
+   	color = phong(Pj, W, Nj, Mj);
+   	float alpha = Mj[3].a;
+
+   	//if(alpha > 0.0) {
+      	t = 1000.0;
+      	vec3 R = reflect(-W, Nj);
+      	vec4 Si;
+      	mat4 Mi;
+
+      	for(int i = 0; i < NSHAPES; i++) {
+         	float _t = ray_sphere(Pj, R, S[i]);
+         	if(_t > 0.001 && _t < t) {
+            	t = _t;
+            	Si = S[i];
+            	Mi = M[i];
+         	}
+      	}
+
+      	if(t > 1000.0) {
+      		vec3 Pi = Pj + t * R;
+      		vec3 Ni = normalize(Pi - Si.xyz);
+         	color = mix(color, phong(Pi, R, Ni, Mi), alpha);
+      	}
+   	//}
    }
 
    gl_FragColor = vec4(sqrt(color), 1.0);
