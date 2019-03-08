@@ -44,12 +44,13 @@ vec3 R(vec3 L, vec3 N) {
    return 2.0 * dot(L, N) * N - L;
 }
 
-float ray_sphere(vec3 V, vec3 W, vec4 S) {
-   float sqrtExp = (pow(dot(W, V), 2.0) 
-                   - dot(V, V) + pow(r, 2.0));
-   float t1 = -dot(W, V) + sqrt(sqrtExp);
-   float t2 = -dot(W, V) - sqrt(sqrtExp);
-   return (t1 < t2) ? t1 : t2;
+float ray_sphere(vec3 V, vec3 W, vec4 sphere) {
+   V -= sphere.xyz;
+   float r = sphere.w;
+   float sqrtExp = (dot(W, V) * dot(W, V)) 
+                   - dot(V, V) + (r * r);
+   float t = -dot(W, V) - sqrt(sqrtExp);
+   return (sqrtExp >= 0.0) ? t : -1.0;
 }
 
 void main() {
