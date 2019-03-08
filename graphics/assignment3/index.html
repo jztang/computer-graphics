@@ -146,7 +146,7 @@ var i, text = fs.split('\n'), cols = 0;
 for (i = 0 ; i < text.length ; i++)
    cols = Math.max(cols, text[i].length);
 
-textArea.rows = text.length;
+textArea.rows = 40;
 textArea.cols = cols;
 textArea.value = fs;
 textArea.style.backgroundColor = '#202020';
