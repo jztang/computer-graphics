@@ -1,0 +1,266 @@
+<script src=lib3.js></script>
+
+<head>
+<title>Assignment 4</title>
+</head>
+<body bgcolor=black text=white link=white alink=white vlink=white>
+<center>
+<canvas id='canvas1' width=500 height=500></canvas>
+</center>
+</body>
+
+
+<!! VERTEX SHADER >
+
+<script id='my_vertex_shader' type='x-shader/x-vertex'>
+   attribute vec3 aPos;
+   varying   vec3 vPos;
+   void main() {
+      gl_Position = vec4(aPos, 1.);
+      vPos = aPos;
+   }
+</script>
+
+
+<!! FRAGMENT SHADER: THIS IS WHERE YOU WILL DO YOUR WORK >
+
+<script id='my_fragment_shader' type='x-shader/x-fragment'>
+
+uniform mat3  uL;
+uniform float uTime;
+uniform vec4  uCuboid1[6];
+uniform vec4  uCuboid2[6];
+uniform vec4  uCuboid3[6];
+
+varying vec3  vPos;
+
+float ray_plane(vec3 V, vec3 W, vec4 plane) {
+   return -(dot(plane.xyz, V) + plane.w) / dot(plane.xyz, W);
+}
+
+vec4 rayCuboid(vec3 V, vec3 W, mat4 M, vec4[6] S) {
+   float tIn = -1., tOut = 1000.;
+   vec3 N;
+   for(int i = 0; i < 6; i++) {
+      vec4 plane = S[i] * M;
+      float t = ray_plane(V, W, plane);
+      if(dot(W, plane.xyz) > 0.)
+         tOut = min(tOut, t);
+      else if(t > tIn) {
+         tIn = t;
+         N = plane.xyz;
+      }
+   }
+   return vec4(normalize(N), tIn < tOut ? tIn : -1.);
+}
+
+mat4 inverse(mat4 m) {
+   float x = dot(m[0],m[0]), y = dot(m[1],m[1]), z = dot(m[2],m[2]);
+   return mat4(m[0].x / x, m[1].x / y, m[2].x / z, 0.,
+               m[0].y / x, m[1].y / y, m[2].y / z, 0.,
+               m[0].z / x, m[1].z / y, m[2].z / z, 0.,
+       -dot(m[0],m[3])/x, -dot(m[1],m[3])/y, -dot(m[2],m[3])/z, 1.);
+}
+
+mat4 identity() {
+    return mat4(1.0, 0.0, 0.0, 0.0, 
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 scale(float x,float y,float z) {
+    return mat4(  x, 0.0, 0.0, 0.0,
+                0.0,   y, 0.0, 0.0,
+                0.0, 0.0,   z, 0.0,
+                0.0 ,0.0, 0.0, 1.0);
+}
+
+mat4 translate(float x, float y, float z) {
+    return mat4(1.0, 0.0, 0.0,   x,
+                0.0, 1.0, 0.0,   y,
+                0.0, 0.0, 1.0,   z,
+                0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 rotX(float theta) {
+   float c = cos(theta), s = sin(theta);
+   return mat4(1.0, 0.0, 0.0, 0.0,
+               0.0,   c,   s, 0.0,
+               0.0,  -s,   c, 0.0,
+               0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 rotY(float theta) {
+   float c = cos(theta), s = sin(theta);
+   return mat4(  c, 0.0,   s, 0.0,
+               0.0, 1.0, 0.0, 0.0,
+                -s, 0.0,   c, 0.0,
+               0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 rotZ(float theta) {
+   float c = cos(theta), s = sin(theta);
+   return mat4(  c,   s, 0.0, 0.0,
+                -s,   c, 0.0, 0.0,
+               0.0, 0.0, 1.0, 0.0,
+               0.0, 0.0, 0.0, 1.0);
+}
+
+float fl = 3.5;
+vec3 skyColor = vec3(.0,.0,.15);
+
+void main() {
+   vec3 V = vec3(0., 0., fl);
+   vec3 W = normalize(vec3(vPos.x, vPos.y, -fl));
+
+   vec3 color = skyColor;
+   float t;
+
+   /* Things got weird when I tried to transform
+      multiple shapes together */
+   mat4 T = inverse(
+              rotY(-1.99) *
+              rotX(0.02) *
+              rotZ(0.785398) *
+              translate(-0.5, -0.5, 0.0) *
+              scale(.6,.6,.6)
+            );
+
+   // Render each cuboid
+   vec4 Nt1 = rayCuboid(V, W, T, uCuboid1);
+   if (Nt1.w > 0.)
+      color = uL[1] * (.1 + max(0., dot(Nt1.xyz, uL[0])));
+
+   vec4 Nt2 = rayCuboid(V, W, T, uCuboid2);
+   if (Nt2.w > 0.)
+      color = uL[1] * (.1 + max(0., dot(Nt2.xyz, uL[0])));
+
+   vec4 Nt3 = rayCuboid(V, W, T, uCuboid3);
+   if (Nt3.w > 0.)
+      color = uL[1] * (.1 + max(0., dot(Nt3.xyz, uL[0])));
+
+   gl_FragColor = vec4(sqrt(color), 1.0);
+}
+</script>
+
+<!! CREATE A PROPERLY DESCRIPTIVE TITLE BELOW >
+
+<script id='my_title' type='text/html'>
+Assignment 5
+</script>
+
+<script id='my_instructions' type='text/html'><font color=#b0b0b0>
+This is a fragment shader for my Computer<br>
+Graphics class. The program implments ray<br>
+tracing to half spaces. My idea was to<br>
+make a <a href="https://en.wikipedia.org/wiki/Penrose_triangle">Penrose triangle</a>.
+<p>
+The Penrose triangle is an optical illusion<br>
+of an "impossible shape". <a href="http://www.physics.montana.edu/demonstrations/video/6_optics/demos/pics/impossibletriangle2.JPG">Here</a> is another<br>
+angle which shows what the real shape<br>
+looks like.<br>
+<p>
+I wasn't sure how to implement the shape<br>
+as a whole using half spaces, so I instead<br>
+opted to make three separate cuboids and<br>
+combine them. You can see my design<br>
+process <a href="https://cdn.discordapp.com/attachments/293513409293713409/555602805650489385/unknown.png">here</a>.
+<p>
+Unfortunately, since I was dealing with<br>
+three separate shapes, I couldn't quite<br>
+get them to rotate together and keep the<br>
+original shape.
+<p>
+<a href="../index.html">Back</a>
+</script>
+
+
+<!! GENERAL HTML SUPPORT >
+   
+<script>
+var vs = my_vertex_shader.innerHTML,
+    fs = my_fragment_shader.innerHTML;
+    fs = fs.substring(1, fs.length);
+
+document.body.innerHTML = [''
+   ,'<center><font size=6 color=#b0b0b0>' + my_title.innerHTML + '</center>'
+   ,'<TABLE cellspacing=0 cellpadding=0><TR>'
+   ,'<td width=50></td><td><font color=red size=5><div id=errorMessage>&nbsp;</div></font></td>'
+   ,'</TR><TR>'
+   ,'<table cellspacing=10>'
+   ,'<tr>'
+   ,'<td valign=top><font size=2 color=red><div id=errorMarker>&nbsp;</div></font></td>'
+   ,'<td valign=top>'
+   ,'<textArea id=textArea spellcheck=false '
+   ,'style="font:16px courier;outline-width:0;border-style:none;resize:none;overflow:scroll;"'
+   ,'></textArea>'
+   ,'</td><td valign=top>' + document.body.innerHTML + '</td>'
+   ,'<td valign=top><font size=5>' + my_instructions.innerHTML + '</td>'
+   ,'</tr></table>'
+   ,'</TR></TABLE>'
+   ].join('');
+
+var i, text = fs.split('\n'), cols = 0;
+for (i = 0 ; i < text.length ; i++)
+   cols = Math.max(cols, text[i].length);
+
+textArea.rows = 40;
+textArea.cols = cols;
+textArea.value = fs;
+textArea.style.backgroundColor = '#202020';
+textArea.style.color = 'white';
+textArea.onkeyup = function() { canvas1.setShaders(vs, this.value); }
+
+var startTime = Date.now();
+
+function dot(a, b) {
+   let d = 0;
+   for (let i = 0 ; i < a.length ; i++)
+      d += a[i] * b[i];
+   return d;
+}
+
+function normalize(v) {
+   let s = Math.sqrt(dot(v, v));
+   for (let i = 0 ; i < v.length ; i++)
+      v[i] /= s;
+   return v;
+}
+
+function animate(gl) {
+   let time = (Date.now() - startTime) / 1000;
+
+   setUniform('1f', 'uTime', time);
+   {
+      setUniform('Matrix3fv', 'uL', false, [.57,.57,.57, 1,1,1, 0,0,0]);
+
+      setUniform('4fv', 'uCuboid1', [
+         -1,  0,  0,  0    , 
+          1,  0,  0, -0.25 , 
+          0, -1,  0,  0.25 ,
+          0,  1,  0, -1.25 ,
+          0,  0, -1,  0    ,
+          0,  0,  1, -0.25 ]);
+
+      setUniform('4fv', 'uCuboid2', [
+         -1,  0,  0,  0    , 
+          1,  0,  0, -1    , 
+          0, -1,  0,  0    ,
+          0,  1,  0, -0.25 ,
+          0,  0, -1,  0    ,
+          0,  0,  1, -0.25 ]);
+
+      setUniform('4fv', 'uCuboid3', [
+         -1,  0,  0,  1    , 
+          1,  0,  0, -1.25 , 
+          0, -1,  0,  0    ,
+          0,  1,  0, -0.25 ,
+          0,  0, -1,  0    ,
+          0,  0,  1, -1    ]);
+   }
+}
+
+gl_start(canvas1, vs, fs);
+</script>
+
