@@ -7,3 +7,4 @@ I use this website to host my computer graphics assignments.
 * [Assignment 2](http://i6.cims.nyu.edu/~jzt212/graphics/assignment2/) - Fragment shader w/ noise
 * [Assignment 3](http://i6.cims.nyu.edu/~jzt212/graphics/assignment3/) - Ray tracing to a sphere & Phong shading
 * [Assignment 4](http://i6.cims.nyu.edu/~jzt212/graphics/assignment4/) - Ray tracing w/ shadows and reflections
+* [Assignment 5](http://i6.cims.nyu.edu/~jzt212/graphics/assignment5/) - Ray tracing using half spaces
