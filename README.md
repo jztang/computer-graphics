@@ -10,3 +10,4 @@ I use this website to host my computer graphics assignments.
 * [Assignment 5](http://i6.cims.nyu.edu/~jzt212/graphics/assignment5/) - Ray tracing using half spaces
 * [Assignment 6](http://i6.cims.nyu.edu/~jzt212/graphics/assignment6/) - Parametrically defined geometric objects
 * [Assignment 7](http://i6.cims.nyu.edu/~jzt212/graphics/assignment7/) - Multiple animating objects
+* [Assignment 8](http://i6.cims.nyu.edu/~jzt212/graphics/assignment8/) - Texture mapping
