@@ -1,0 +1,351 @@
+<script src=lib.js></script>
+
+<head>
+<title>Final Project</title>
+</head>
+<body bgcolor=black text=white link=white alink=white vlink=white>
+<center>
+<canvas id='canvas1' width=500 height=500></canvas>
+</center>
+</body>
+
+
+<!! VERTEX SHADER >
+
+<script id='my_vertex_shader' type='x-shader/x-vertex'>
+   attribute vec3 aPos;
+   varying   vec3 vPos;
+   void main() {
+      gl_Position = vec4(aPos, 1.);
+      vPos = aPos;
+   }
+</script>
+
+
+<!! FRAGMENT SHADER: THIS IS WHERE YOU WILL DO YOUR WORK >
+
+<script id='my_fragment_shader' type='x-shader/x-fragment'>
+
+uniform mat3 uLWhite;
+uniform mat3 uLRed;
+uniform mat3 uLGreen;
+uniform mat3 uLBlue;
+uniform mat3 uLYellow;
+uniform mat3 uLOrange;
+uniform float uTime;
+uniform vec4 uCuboid[6];
+
+varying vec3 vPos;
+
+float ray_plane(vec3 V, vec3 W, vec4 plane) {
+   return -(dot(plane.xyz, V) + plane.w) / dot(plane.xyz, W);
+}
+
+vec4 rayCuboid(vec3 V, vec3 W, mat4 M, vec4[6] S) {
+   float tIn = -1., tOut = 1000.;
+   vec3 N;
+   for(int i = 0; i < 6; i++) {
+      vec4 plane = S[i] * M;
+      float t = ray_plane(V, W, plane);
+      if(dot(W, plane.xyz) > 0.)
+         tOut = min(tOut, t);
+      else if(t > tIn) {
+         tIn = t;
+         N = plane.xyz;
+      }
+   }
+   return vec4(normalize(N), tIn < tOut ? tIn : -1.);
+}
+
+mat4 inverse(mat4 m) {
+   float x = dot(m[0],m[0]), y = dot(m[1],m[1]), z = dot(m[2],m[2]);
+   return mat4(m[0].x / x, m[1].x / y, m[2].x / z, 0.,
+               m[0].y / x, m[1].y / y, m[2].y / z, 0.,
+               m[0].z / x, m[1].z / y, m[2].z / z, 0.,
+       -dot(m[0],m[3])/x, -dot(m[1],m[3])/y, -dot(m[2],m[3])/z, 1.);
+}
+
+mat4 identity() {
+    return mat4(1.0, 0.0, 0.0, 0.0, 
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 scale(float x,float y,float z) {
+    return mat4(  x, 0.0, 0.0, 0.0,
+                0.0,   y, 0.0, 0.0,
+                0.0, 0.0,   z, 0.0,
+                0.0 ,0.0, 0.0, 1.0);
+}
+
+mat4 translate(float x, float y, float z) {
+    return mat4(1.0, 0.0, 0.0,   x,
+                0.0, 1.0, 0.0,   y,
+                0.0, 0.0, 1.0,   z,
+                0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 rotX(float theta) {
+   float c = cos(theta), s = sin(theta);
+   return mat4(1.0, 0.0, 0.0, 0.0,
+               0.0,   c,   s, 0.0,
+               0.0,  -s,   c, 0.0,
+               0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 rotY(float theta) {
+   float c = cos(theta), s = sin(theta);
+   return mat4(  c, 0.0,  -s, 0.0,
+               0.0, 1.0, 0.0, 0.0,
+                 s, 0.0,   c, 0.0,
+               0.0, 0.0, 0.0, 1.0);
+}
+
+mat4 rotZ(float theta) {
+   float c = cos(theta), s = sin(theta);
+   return mat4(  c,   s, 0.0, 0.0,
+                -s,   c, 0.0, 0.0,
+               0.0, 0.0, 1.0, 0.0,
+               0.0, 0.0, 0.0, 1.0);
+}
+
+float fl = 3.5;
+vec3 skyColor = vec3(.05,.05,.05);
+
+void main() {
+   vec3 V = vec3(0., 0., fl);
+   vec3 W = normalize(vec3(vPos.x, vPos.y, -fl));
+
+   vec3 color = skyColor;
+   float pi = 3.14159265359;
+
+   mat4 T = inverse(
+              rotX(0.15 * pi) *
+              rotY(0.25 * pi) *
+              scale(.4,.4,.4) 
+              //*translate(-.13,.13,.0) 
+            );
+
+   /*vec4 Nt = rayCuboid(V, W, T, uCuboid);
+   if (Nt.w > 0.)
+      color = uLWhite[1] * (.1 + max(0., dot(Nt.xyz, uLWhite[0])));*/
+
+   vec4 Nt1 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(-.13,.13,-.13)), uCuboid);
+   if (Nt1.w > 0.)
+      color = uLYellow[1] * (.1 + max(0., dot(Nt1.xyz, uLYellow[0])));
+
+   vec4 Nt2 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.0,.13,-.13)), uCuboid);
+   if (Nt2.w > 0.)
+      color = uLOrange[1] * (.1 + max(0., dot(Nt2.xyz, uLOrange[0])));
+
+   vec4 Nt3 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.13,.13,-.13)), uCuboid);
+   if (Nt3.w > 0.)
+      color = uLGreen[1] * (.1 + max(0., dot(Nt3.xyz, uLGreen[0])));
+
+   vec4 Nt4 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(-.13,.0,-.13)), uCuboid);
+   if (Nt4.w > 0.)
+      color = uLRed[1] * (.1 + max(0., dot(Nt4.xyz, uLRed[0])));
+
+   vec4 Nt5 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.0,.0,-.13)), uCuboid);
+   if (Nt5.w > 0.)
+      color = uLYellow[1] * (.1 + max(0., dot(Nt5.xyz, uLYellow[0])));
+
+   vec4 Nt6 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.13,.0,-.13)), uCuboid);
+   if (Nt6.w > 0.)
+      color = uLOrange[1] * (.1 + max(0., dot(Nt6.xyz, uLOrange[0])));
+
+   vec4 Nt7 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(-.13,-.13,-.13)), uCuboid);
+   if (Nt7.w > 0.)
+      color = uLWhite[1] * (.1 + max(0., dot(Nt7.xyz, uLWhite[0])));
+
+   vec4 Nt8 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.0,-.13,-.13)), uCuboid);
+   if (Nt8.w > 0.)
+      color = uLYellow[1] * (.1 + max(0., dot(Nt8.xyz, uLYellow[0])));
+
+   vec4 Nt9 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.13,-.13,-.13)), uCuboid);
+   if (Nt9.w > 0.)
+      color = uLWhite[1] * (.1 + max(0., dot(Nt9.xyz, uLWhite[0])));
+
+   vec4 Nt10 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(-.13,.13,.0)), uCuboid);
+   if (Nt10.w > 0.)
+      color = uLBlue[1] * (.1 + max(0., dot(Nt10.xyz, uLBlue[0])));
+
+   vec4 Nt11 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(.0,.13,.0)), uCuboid);
+   if (Nt11.w > 0.)
+      color = uLBlue[1] * (.1 + max(0., dot(Nt11.xyz, uLBlue[0])));
+
+   vec4 Nt12 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(.13,.13,.0)), uCuboid);
+   if (Nt12.w > 0.)
+      color = uLOrange[1] * (.1 + max(0., dot(Nt12.xyz, uLOrange[0])));
+
+   vec4 Nt13 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(-.13,.0,.0)), uCuboid);
+   if (Nt13.w > 0.)
+      color = uLRed[1] * (.1 + max(0., dot(Nt13.xyz, uLRed[0])));
+
+   vec4 Nt14 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(.0,.0,.0)), uCuboid);
+   if (Nt14.w > 0.)
+      color = uLRed[1] * (.1 + max(0., dot(Nt14.xyz, uLRed[0])));
+
+   vec4 Nt15 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(.13,.0,.0)), uCuboid);
+   if (Nt15.w > 0.)
+      color = uLWhite[1] * (.1 + max(0., dot(Nt15.xyz, uLWhite[0])));
+
+   vec4 Nt16 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(-.13,-.13,.0)), uCuboid);
+   if (Nt16.w > 0.)
+      color = uLOrange[1] * (.1 + max(0., dot(Nt16.xyz, uLOrange[0])));
+
+   vec4 Nt17 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(.0,-.13,.0)), uCuboid);
+   if (Nt17.w > 0.)
+      color = uLRed[1] * (.1 + max(0., dot(Nt17.xyz, uLRed[0])));
+
+   vec4 Nt18 = rayCuboid(V, W, inverse(rotZ(-uTime) * scale(.4,.4,.4) * translate(.13,-.13,.0)), uCuboid);
+   if (Nt18.w > 0.)
+      color = uLBlue[1] * (.1 + max(0., dot(Nt18.xyz, uLBlue[0])));
+
+   vec4 Nt19 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(-.13,.13,.13)), uCuboid);
+   if (Nt19.w > 0.)
+      color = uLOrange[1] * (.1 + max(0., dot(Nt19.xyz, uLOrange[0])));
+
+   vec4 Nt20 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.0,.13,.13)), uCuboid);
+   if (Nt20.w > 0.)
+      color = uLBlue[1] * (.1 + max(0., dot(Nt20.xyz, uLBlue[0])));
+
+   vec4 Nt21 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.13,.13,.13)), uCuboid);
+   if (Nt21.w > 0.)
+      color = uLGreen[1] * (.1 + max(0., dot(Nt21.xyz, uLGreen[0])));
+
+   vec4 Nt22 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(-.13,.0,.13)), uCuboid);
+   if (Nt22.w > 0.)
+      color = uLGreen[1] * (.1 + max(0., dot(Nt22.xyz, uLGreen[0])));
+
+   vec4 Nt23 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.0,.0,.13)), uCuboid);
+   if (Nt23.w > 0.)
+      color = uLRed[1] * (.1 + max(0., dot(Nt23.xyz, uLRed[0])));
+
+   vec4 Nt24 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.13,.0,.13)), uCuboid);
+   if (Nt24.w > 0.)
+      color = uLGreen[1] * (.1 + max(0., dot(Nt24.xyz, uLGreen[0])));
+
+   vec4 Nt25 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(-.13,-.13,.13)), uCuboid);
+   if (Nt25.w > 0.)
+      color = uLGreen[1] * (.1 + max(0., dot(Nt25.xyz, uLGreen[0])));
+
+   vec4 Nt26 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.0,-.13,.13)), uCuboid);
+   if (Nt26.w > 0.)
+      color = uLBlue[1] * (.1 + max(0., dot(Nt26.xyz, uLBlue[0])));
+
+   vec4 Nt27 = rayCuboid(V, W, inverse(scale(.4,.4,.4) * translate(.13,-.13,.13)), uCuboid);
+   if (Nt27.w > 0.)
+      color = uLYellow[1] * (.1 + max(0., dot(Nt27.xyz, uLYellow[0])));
+
+   gl_FragColor = vec4(sqrt(color), 1.0);
+}
+</script>
+
+<!! CREATE A PROPERLY DESCRIPTIVE TITLE BELOW >
+
+<script id='my_title' type='text/html'>
+<font face=helvetica>&nbsp;<br>Rubik's Cube | <a href="index.html">Back</a>
+</script>
+
+
+<!! GENERAL HTML SUPPORT >
+   
+<script>
+var vs = my_vertex_shader.innerHTML,
+    fs = my_fragment_shader.innerHTML;
+    fs = fs.substring(1, fs.length);
+
+document.body.innerHTML = [''
+   ,'<center><font size=6 color=#b0b0b0>' + my_title.innerHTML + '</center>'
+   ,'<TABLE cellspacing=0 cellpadding=0><TR>'
+   ,'<td width=50></td><td><font color=red size=5><div id=errorMessage>&nbsp;</div></font></td>'
+   ,'</TR><TR>'
+   ,'<table cellspacing=10>'
+   ,'<tr>'
+   ,'</td><td valign=top>' + document.body.innerHTML + '</td>'
+   ,'<td valign=top><font size=2 color=red><div id=errorMarker>&nbsp;</div></font></td>'
+   ,'<td valign=top>'
+   ,'<textArea id=textArea spellcheck=false '
+   ,'style="font:20px courier;outline-width:0;border-style:none;resize:none;overflow:scroll;"'
+   ,'></textArea>'
+   ,'</tr></table>'
+   ,'</TR></TABLE>'
+   ].join('');
+
+var i, text = fs.split('\n'), cols = 0;
+for (i = 0 ; i < text.length ; i++)
+   cols = Math.max(cols, text[i].length);
+
+textArea.rows = 30;
+textArea.cols = cols + 2;
+textArea.value = fs;
+textArea.style.backgroundColor = '#202020';
+textArea.style.color = 'white';
+textArea.onkeyup = function() { canvas1.setShaders(vs, this.value); }
+
+let startTime = Date.now();
+
+function dot(a, b) {
+   let d = 0;
+   for (let i = 0 ; i < a.length ; i++)
+      d += a[i] * b[i];
+   return d;
+}
+
+function normalize(v) {
+   let s = Math.sqrt(dot(v, v));
+   for (let i = 0 ; i < v.length ; i++)
+      v[i] /= s;
+   return v;
+}
+
+function animate(gl) {
+   let time = (Date.now() - startTime) / 1000;
+
+   setUniform('1f', 'uTime', time);
+   {
+      setUniform('Matrix3fv', 'uLWhite', false, [
+        0.57, 0.57, 0.57,
+        1.00, 1.00, 1.00,
+        0.00, 0.00, 0.00]);
+
+      setUniform('Matrix3fv', 'uLRed', false, [
+        0.50, 0.00, 0.00,
+        1.00, 0.00, 0.00,
+        0.00, 0.00, 0.00]);
+
+      setUniform('Matrix3fv', 'uLGreen', false, [
+        0.00, 0.50, 0.00,
+        0.00, 1.00, 0.00,
+        0.00, 0.00, 0.00]);
+
+      setUniform('Matrix3fv', 'uLBlue', false, [
+        0.00, 0.00, 0.50,
+        0.00, 0.00, 1.00,
+        0.00, 0.00, 0.00]);
+
+      setUniform('Matrix3fv', 'uLYellow', false, [
+        0.50, 0.50, 0.00,
+        1.00, 1.00, 0.00,
+        0.00, 0.00, 0.00]);
+
+      setUniform('Matrix3fv', 'uLOrange', false, [
+        0.50, 0.25, 0.00,
+        1.00, 0.50, 0.00,
+        0.00, 0.00, 0.00]);
+
+      setUniform('4fv', 'uCuboid', [ 
+         -1,  0,  0, -0.35, 
+          0, -1,  0, -0.35, 
+          0,  0, -1, -0.35,
+          1,  0,  0, -0.35, 
+          0,  1,  0, -0.35, 
+          0,  0,  1, -0.35 ]);
+   }
+}
+
+gl_start(canvas1, vs, fs);
+</script>
+

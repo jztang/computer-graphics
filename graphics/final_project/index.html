@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../_css/style.css" type="text/css">
+        <title>Final Project</title>
+    </head>
+    <body>
+        <h2>Final Project - Rubik's Cube</h2>
+
+        <p class="text">
+        The goal of my final project was to create a working Rubik's Cube using ray tracing to half spaces. My<br>
+        implementation involves 27 cube half spaces, each representing a part of a standard 3x3 Rubik's Cube.<br><br>
+
+        Each "small" cube is labeled 1-27. Cubes 1-9 are the back layer, cubes 10-18 are the middle layer, and<br>
+        cubes 19-27 are the front layer. I wasn't sure how to make "timed" animations such that the cube<br>
+        appeared to solve itself, or how to make different faces of the same ray traced cube have different<br>
+        colors. So I just have the faces rotating constantly, and cube half spaces in one color.<br><br>
+
+        When I tried to render the cube, my PC's CPU usage shot up to 100%. I guess ray tracing to 27 different<br>
+        half spaces is very resource intensive. I have the Rubik's Cube rotating, but the animation is very choppy<br>
+        because of the high CPU usage. So click the examples below at your own risk, as your computer will<br>
+        probably slow down a lot when it runs.<br>
+        </p>
+
+        <p class="text">
+        <a href="example1.html">Rotating front face</a><br>
+        <a href="example2.html">Rotating left face</a><br>
+        <a href="example3.html">Rotating middle layer</a><br><br>
+        <a href="../index.html">Back</a>
+        </p>
+    </body>
+</html>
